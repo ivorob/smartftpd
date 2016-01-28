@@ -1,0 +1,8 @@
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+PROJECT (smartftpd)
+
+SET (SRC_DIR src)
+SET (SOURCES 
+        ${SRC_DIR}/main.cpp)
+
+ADD_EXECUTABLE (smartftpd ${SOURCES})
