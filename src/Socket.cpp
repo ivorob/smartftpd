@@ -12,14 +12,31 @@ Socket::Socket()
     setImpl();
 }
 
+Socket::Socket(Socket&& other)
+    : impl(0)
+{
+    setImpl(new SocketImpl(other.getImpl()));
+    other.clearImpl();
+}
+
+Socket::~Socket()
+{
+    if (this->impl) {
+        getImpl().close();
+    }
+    clearImpl();
+}
+
 void
 Socket::bind(uint16_t port)
 {
+    getImpl().reuse();
+
     struct sockaddr_in addr = {0};
     addr.sin_len = sizeof(addr);
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
     if (!getImpl().bind(addr)) {
         throw std::runtime_error(strerror(errno));
     }
@@ -32,7 +49,32 @@ Socket::getImpl() const
 }
 
 void
-Socket::setImpl()
+Socket::setImpl(SocketImpl *impl)
 {
-    this->impl = new SocketImpl();
+    if (this->impl) {
+        getImpl().close();
+        clearImpl();
+    }
+
+    if (!impl) {
+        this->impl = new SocketImpl();
+    } else {
+        this->impl = impl;
+    }
+}
+
+void
+Socket::clearImpl()
+{
+    delete this->impl;
+    this->impl = 0;
+}
+
+Socket
+Socket::accept()
+{
+    getImpl().listen(SOMAXCONN);
+    Socket newSocket;
+    newSocket.setImpl(getImpl().accept());
+    return std::move(newSocket);
 }

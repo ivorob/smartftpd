@@ -8,11 +8,16 @@ class SocketImpl;
 class Socket {
 public:
     Socket();
+    Socket(Socket&& other);
+    virtual ~Socket();
 
     void bind(uint16_t port);
+    Socket accept();
+protected:
+    virtual void setImpl(SocketImpl *impl = 0);
 private:
     SocketImpl& getImpl() const;
-    void setImpl();
+    void clearImpl();
 private:
     SocketImpl *impl;
 };
