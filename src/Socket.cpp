@@ -1,5 +1,8 @@
+#if defined(__linux__)
 #include <sys/types.h>
 #include <sys/socket.h>
+#endif
+
 #include <stdexcept>
 #include <string.h>
 #include <errno.h>
@@ -33,7 +36,9 @@ Socket::bind(uint16_t port)
     getImpl().reuse();
 
     struct sockaddr_in addr = {0};
+#if defined(__linux__)
     addr.sin_len = sizeof(addr);
+#endif
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = htonl(INADDR_ANY);

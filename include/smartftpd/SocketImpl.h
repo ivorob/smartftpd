@@ -1,12 +1,18 @@
-#ifndef __SMARTFTPD_SOCKET_IMPL_H__
-#define __SMARTFTPD_SOCKET_IMPL_H__
+#pragma once
 
+#if defined(__linux__)
 #include <netinet/in.h>
+#elif defined(_WIN32) || defined(_WIN64)
+#include <winsock2.h>
+#endif
 
 class SocketImpl {
 public:
+#if defined(__linux__)
+    typedef int SOCKET;
+#endif
     SocketImpl();
-    SocketImpl(int sockfd);
+    SocketImpl(SOCKET sockfd);
     SocketImpl(const SocketImpl& impl);
     virtual ~SocketImpl();
 
@@ -18,7 +24,5 @@ public:
 
     SocketImpl *accept();
 private:
-    int sockfd;
+    SOCKET sockfd;
 };
-
-#endif //__SMARTFTPD_SOCKET_IMPL_H__

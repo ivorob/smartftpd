@@ -1,6 +1,11 @@
+#if defined(__linux__)
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#elif defined(_WIN32) || defined(_WIN64)
+#include <winsock2.h>
+#endif
+
 #include "smartftpd/SocketImpl.h"
 
 SocketImpl::SocketImpl()
@@ -11,7 +16,7 @@ SocketImpl::SocketImpl()
     }
 }
 
-SocketImpl::SocketImpl(int sockfd)
+SocketImpl::SocketImpl(SOCKET sockfd)
     : sockfd(sockfd)
 {
     if (this->sockfd <= 0) {
@@ -41,7 +46,7 @@ bool
 SocketImpl::reuse()
 {
     int enable = 1;
-    return setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0;
+    return setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char *)&enable, sizeof(enable)) < 0;
 }
 
 int
@@ -53,7 +58,7 @@ SocketImpl::listen(int backlog)
 SocketImpl *
 SocketImpl::accept()
 {
-    int sockfd = ::accept(this->sockfd, 0, 0);
+    SOCKET sockfd = ::accept(this->sockfd, 0, 0);
     return sockfd > 0 ? new SocketImpl(sockfd) : 0;
 }
 
@@ -61,6 +66,10 @@ void
 SocketImpl::close()
 {
     if (this->sockfd > 0) {
+#if defined(__linux__)
         ::close(this->sockfd);
+#elif defined(_WIN32) || defined(_WIN64)
+        closesocket(this->sockfd);
+#endif
     }
 }
