@@ -22,10 +22,18 @@ void connectToPort(uint16_t port) {
 #endif 
         addr.sin_family = AF_INET;
         addr.sin_port = htons(port);
-        addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+        struct hostent *host = gethostbyname("localhost");
+        memcpy(&addr.sin_addr.s_addr, host->h_addr_list[0], sizeof(addr.sin_addr.s_addr));
         if (connect(sockfd, (const struct sockaddr *)&addr, sizeof(addr)) < 0) {
             FAIL() << "Connection failed to port " << port;
         }
+
+#if defined(__linux__)
+        ::close(sockfd);
+#elif defined(_WIN32) || defined(_WIN64)
+        closesocket(sockfd);
+#endif 
     }
 }
 
@@ -34,17 +42,19 @@ void connectToPort(uint16_t port) {
 TEST(SocketTests, Bind)
 {
     Socket tcpSocket;
+#if defined(__linux__)
     try {
         tcpSocket.bind(21);
         FAIL() << "Permission denied exception expected";
     } catch (const std::exception& error) {
         ASSERT_STREQ("Permission denied", error.what());
     }
+#endif
 
     try {
         tcpSocket.bind(10021);
-    } catch (...) {
-        FAIL() << "No exception expected";
+    } catch (const std::exception& error) {
+        FAIL() << "No exception expected: " << error.what();
     }
 }
 
