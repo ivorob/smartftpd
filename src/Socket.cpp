@@ -36,7 +36,7 @@ Socket::bind(uint16_t port)
     getImpl().reuse();
 
     struct sockaddr_in addr = {0};
-#if defined(__linux__)
+#if !defined(__linux__)
     addr.sin_len = sizeof(addr);
 #endif
     addr.sin_family = AF_INET;

@@ -20,7 +20,7 @@ void connectToPort(uint16_t port) {
     SOCKET sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd > 0) {
         struct sockaddr_in addr;
-#if defined(__linux__)
+#if !defined(__linux__) 
         addr.sin_len = sizeof(addr);
 #endif 
         addr.sin_family = AF_INET;
@@ -32,7 +32,7 @@ void connectToPort(uint16_t port) {
             FAIL() << "Connection failed to port " << port;
         }
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE_CC__)
         ::close(sockfd);
 #elif defined(_WIN32) || defined(_WIN64)
         closesocket(sockfd);
