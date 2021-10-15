@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+
+using SOCKET=int;
 #elif defined(_WIN32) || defined(_WIN64)
 #include <winsock2.h>
 #endif
