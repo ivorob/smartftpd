@@ -1,7 +1,9 @@
 #pragma once
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE_CC__)
 #include <netinet/in.h>
+
+using SOCKET=int;
 #elif defined(_WIN32) || defined(_WIN64)
 #include <winsock2.h>
 #endif

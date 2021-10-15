@@ -1,4 +1,4 @@
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE_CC__)
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -34,6 +34,7 @@ SocketImpl::SocketImpl(const SocketImpl& impl)
 
 SocketImpl::~SocketImpl()
 {
+    close();
 }
 
 bool

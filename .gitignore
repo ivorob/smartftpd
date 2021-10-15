@@ -1,10 +1,4 @@
 *~
 *.swp
-CMakeFiles
-CMakeCache.txt
-cmake_install.cmake
-Makefile
-smartftpd
-tests/tests
 build
 thirdparty\googletest

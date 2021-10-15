@@ -1,10 +1,11 @@
 #include <thread>
 #include <gtest/gtest.h>
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE_CC__)
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #elif defined(_WIN32) || defined(_WIN64)
 #include <winsock2.h>
 #endif
