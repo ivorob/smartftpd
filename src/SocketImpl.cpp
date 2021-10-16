@@ -34,7 +34,6 @@ SocketImpl::SocketImpl(const SocketImpl& impl)
 
 SocketImpl::~SocketImpl()
 {
-    close();
 }
 
 bool
@@ -47,7 +46,8 @@ bool
 SocketImpl::reuse()
 {
     int enable = 1;
-    return setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char *)&enable, sizeof(enable)) < 0;
+    return setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char *)&enable, sizeof(enable)) == 0 &&
+           setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, (const char *)&enable, sizeof(enable)) == 0;
 }
 
 int
@@ -67,7 +67,7 @@ void
 SocketImpl::close()
 {
     if (this->sockfd > 0) {
-#if defined(__linux__)
+#if defined(__linux__) || defined(__APPLE_CC__)
         ::close(this->sockfd);
 #elif defined(_WIN32) || defined(_WIN64)
         closesocket(this->sockfd);
