@@ -5,7 +5,7 @@ IF (BUILD_TESTING)
     SET (gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
     IF (LINUX)
-        SET (CXXFLAGS "${CXXFLAGS} -Wno-error=deprecated-copy")
+        SET (CXXFLAGS "-Wno-error=deprecated-copy")
     ENDIF ()
 
     ADD_SUBDIRECTORY (googletest)
