@@ -46,8 +46,7 @@ bool
 SocketImpl::reuse()
 {
     int enable = 1;
-    return setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char *)&enable, sizeof(enable)) == 0 &&
-           setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, (const char *)&enable, sizeof(enable)) == 0;
+    return setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char *)&enable, sizeof(enable)) == 0;
 }
 
 int
