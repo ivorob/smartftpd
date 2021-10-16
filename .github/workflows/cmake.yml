@@ -53,4 +53,4 @@ jobs:
       with:
         name: smartftpd
         path: |
-          smartftpd
+          ${{github.workspace}}/**/smartftpd*
