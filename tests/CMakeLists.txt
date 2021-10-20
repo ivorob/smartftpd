@@ -25,7 +25,7 @@ TARGET_LINK_LIBRARIES (tests gtest)
 TARGET_INCLUDE_DIRECTORIES (tests PRIVATE ${INCLUDE_DIR})
 
 ADD_CUSTOM_TARGET (JUnitTestReport
-    COMMAND $<TARGET_FILE:tests> --gtest_output="xml:tests.xml"
+    COMMAND $<TARGET_FILE:tests> --gtest_output="xml:$ENV{BINARY_DIR}/tests.xml"
     DEPENDS tests
 )
 
