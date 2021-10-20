@@ -5,7 +5,7 @@ on: [push]
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  BINARY_DIR: ${{github.workspace}}
+  BINARY_DIR: ${{github.workspace}}/build
 
 jobs:
   build:
@@ -56,7 +56,7 @@ jobs:
       uses: dorny/test-reporter@v1
       with:
         name: Tests
-        path: ${{github.workspace}}/build/tests.xml
+        path: $BINARY_DIR/tests.xml
         reporter: jest-junit
 
     - name: Archive production artifacts
