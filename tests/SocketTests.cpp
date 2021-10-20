@@ -6,18 +6,17 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-
-using SOCKET=int;
 #elif defined(_WIN32) || defined(_WIN64)
 #include <winsock2.h>
 #endif
 
 #include "smartftpd/Socket.h"
+#include "smartftpd/BSDSocketEngine.h"
 
 namespace {
 
 void connectToPort(uint16_t port) {
-    SOCKET sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd > 0) {
         struct sockaddr_in addr;
 #if defined(__APPLE_CC__) 
@@ -44,7 +43,8 @@ void connectToPort(uint16_t port) {
 
 TEST(SocketTests, Bind)
 {
-    Socket tcpSocket;
+    BSDSocketEngine socketEngine;
+    Socket tcpSocket(socketEngine);
 #if defined(__linux__)
     try {
         tcpSocket.bind(21);
@@ -63,7 +63,8 @@ TEST(SocketTests, Bind)
 
 TEST(SocketTests, Accept)
 {
-    Socket tcpSocket;
+    BSDSocketEngine socketEngine;
+    Socket tcpSocket(socketEngine);
     tcpSocket.bind(10021);
 
     std::thread thread(connectToPort, 10021);

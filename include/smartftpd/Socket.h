@@ -1,25 +1,23 @@
-#ifndef __SMARTFTPD_SOCKET_H__
-#define __SMARTFTPD_SOCKET_H__
+#pragma once
 
 #include <cstdint>
 
-class SocketImpl;
+#include "SocketImpl.h"
+#include "SocketEngine.h"
 
 class Socket {
 public:
-    Socket();
-    Socket(Socket&& other);
-    virtual ~Socket();
+    Socket(SocketEngine& engine);
+    Socket(SocketImplHolder impl);
+    Socket(Socket&& other) = default;
+    virtual ~Socket() = default;
 
     void bind(uint16_t port);
     Socket accept();
 protected:
-    virtual void setImpl(SocketImpl *impl = 0);
+    virtual void setImpl(SocketImplHolder impl);
 private:
     SocketImpl& getImpl() const;
-    void clearImpl();
 private:
-    SocketImpl *impl;
+    std::unique_ptr<SocketImpl> impl;
 };
-
-#endif //__SMARTFTPD_SOCKET_H__

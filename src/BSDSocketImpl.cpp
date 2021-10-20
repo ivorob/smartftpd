@@ -6,9 +6,9 @@
 #include <winsock2.h>
 #endif
 
-#include "smartftpd/SocketImpl.h"
+#include "smartftpd/BSDSocketImpl.h"
 
-SocketImpl::SocketImpl()
+BSDSocketImpl::BSDSocketImpl()
 {
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (this->sockfd <= 0) {
@@ -16,7 +16,7 @@ SocketImpl::SocketImpl()
     }
 }
 
-SocketImpl::SocketImpl(SOCKET sockfd)
+BSDSocketImpl::BSDSocketImpl(int sockfd)
     : sockfd(sockfd)
 {
     if (this->sockfd <= 0) {
@@ -24,46 +24,43 @@ SocketImpl::SocketImpl(SOCKET sockfd)
     }
 }
 
-SocketImpl::SocketImpl(const SocketImpl& impl)
-    : sockfd(impl.sockfd)
+BSDSocketImpl::~BSDSocketImpl()
 {
-    if (this->sockfd <= 0) {
-        //TODO: exception
-    }
-}
-
-SocketImpl::~SocketImpl()
-{
+    close();
 }
 
 bool
-SocketImpl::bind(const struct sockaddr_in& addr)
+BSDSocketImpl::bind(const struct sockaddr_in& addr)
 {
     return ::bind(this->sockfd, (struct sockaddr *)&addr, sizeof(addr)) == 0;
 }
 
 bool
-SocketImpl::reuse()
+BSDSocketImpl::reuse()
 {
     int enable = 1;
     return setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char *)&enable, sizeof(enable)) == 0;
 }
 
 int
-SocketImpl::listen(int backlog)
+BSDSocketImpl::listen(int backlog)
 {
     return ::listen(this->sockfd, backlog);
 }
 
-SocketImpl *
-SocketImpl::accept()
+SocketImplHolder
+BSDSocketImpl::accept()
 {
-    SOCKET sockfd = ::accept(this->sockfd, 0, 0);
-    return sockfd > 0 ? new SocketImpl(sockfd) : 0;
+    int sockfd = ::accept(this->sockfd, 0, 0);
+    if (sockfd > 0) {
+        return std::make_unique<BSDSocketImpl>(sockfd);
+    }
+
+    return {};
 }
 
 void
-SocketImpl::close()
+BSDSocketImpl::close()
 {
     if (this->sockfd > 0) {
 #if defined(__linux__) || defined(__APPLE_CC__)

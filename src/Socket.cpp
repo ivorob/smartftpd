@@ -9,25 +9,14 @@
 #include "smartftpd/Socket.h"
 #include "smartftpd/SocketImpl.h"
 
-Socket::Socket()
-    : impl(0)
+Socket::Socket(SocketEngine& engine)
+    : impl(engine.makeImpl())
 {
-    setImpl();
 }
 
-Socket::Socket(Socket&& other)
-    : impl(0)
+Socket::Socket(SocketImplHolder impl)
+    : impl(std::move(impl))
 {
-    setImpl(new SocketImpl(other.getImpl()));
-    other.clearImpl();
-}
-
-Socket::~Socket()
-{
-    if (this->impl) {
-        getImpl().close();
-    }
-    clearImpl();
 }
 
 void
@@ -54,32 +43,15 @@ Socket::getImpl() const
 }
 
 void
-Socket::setImpl(SocketImpl *impl)
+Socket::setImpl(SocketImplHolder newImpl)
 {
-    if (this->impl) {
-        getImpl().close();
-        clearImpl();
-    }
-
-    if (!impl) {
-        this->impl = new SocketImpl();
-    } else {
-        this->impl = impl;
-    }
-}
-
-void
-Socket::clearImpl()
-{
-    delete this->impl;
-    this->impl = 0;
+    this->impl = std::move(newImpl);
 }
 
 Socket
 Socket::accept()
 {
     getImpl().listen(SOMAXCONN);
-    Socket newSocket;
-    newSocket.setImpl(getImpl().accept());
+    Socket newSocket(getImpl().accept());
     return std::move(newSocket);
 }

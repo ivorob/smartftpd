@@ -1,30 +1,32 @@
 #pragma once
 
+#include <memory>
+
 #if defined(__linux__) || defined(__APPLE_CC__)
 #include <netinet/in.h>
-
-using SOCKET=int;
 #elif defined(_WIN32) || defined(_WIN64)
 #include <winsock2.h>
 #endif
 
+class SocketImpl;
+
+using SocketImplHolder = std::unique_ptr<SocketImpl>;
+
 class SocketImpl {
 public:
-#if defined(__linux__)
-    typedef int SOCKET;
-#endif
-    SocketImpl();
-    SocketImpl(SOCKET sockfd);
-    SocketImpl(const SocketImpl& impl);
-    virtual ~SocketImpl();
+    SocketImpl() = default;
+    SocketImpl(const SocketImpl&) = delete;
+    SocketImpl(SocketImpl&&) = delete;
+    virtual ~SocketImpl() = default;
 
-    bool bind(const struct sockaddr_in& addr);
-    bool reuse();
+    SocketImpl& operator=(const SocketImpl&) = delete;
+    SocketImpl& operator=(SocketImpl&&) = delete;
 
-    int listen(int backlog);
-    void close();
+    virtual bool bind(const struct sockaddr_in& addr) = 0;
+    virtual bool reuse() = 0;
 
-    SocketImpl *accept();
-private:
-    SOCKET sockfd;
+    virtual int listen(int backlog) = 0;
+    virtual void close() = 0;
+
+    virtual SocketImplHolder accept() = 0;
 };
