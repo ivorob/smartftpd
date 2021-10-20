@@ -56,7 +56,7 @@ jobs:
       uses: dorny/test-reporter@v1
       with:
         name: Tests
-        path: $BINARY_DIR/tests.xml
+        path: ${{github.workspace}}/build/tests.xml
         reporter: jest-junit
 
     - name: Archive production artifacts
