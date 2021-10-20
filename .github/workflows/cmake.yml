@@ -55,7 +55,7 @@ jobs:
     - name: Test Report
       uses: dorny/test-reporter@v1
       with:
-        name: Tests-{{runner.os}}
+        name: Tests report for {{runner.name}}
         working-directory: 'build'
         path: tests.xml
         reporter: jest-junit
