@@ -40,9 +40,8 @@ jobs:
       working-directory: ${{github.workspace}}/build
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: |
-        cmake --build . --config $BUILD_TYPE
-        cmake --build . --config $BUILD_TYPE --target JUnitTestReport
+      run: cmake --build . --config $BUILD_TYPE
+      run: cmake --build . --config $BUILD_TYPE --target JUnitTestReport
 
     - name: Tests
       working-directory: ${{github.workspace}}/build
@@ -56,8 +55,8 @@ jobs:
       with:
         name: Tests
         path: |
-          ${{github.workspace}}/build/tests.xml
-          ${{github.workspace}}/build/$BUILD_TYPE/tests.xml
+          ${{github.workspace}}/build/tests/tests.xml
+          ${{github.workspace}}/build/$BUILD_TYPE/tests/tests.xml
         reporter: jest-junit
 
     - name: Archive production artifacts
