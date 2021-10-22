@@ -7,16 +7,12 @@ SET (SOURCES
         tests.cpp
         SocketTests.cpp
         ${SRC_DIR}/Socket.cpp
-        ${SRC_DIR}/BSDSocketImpl.cpp
-        ${SRC_DIR}/BSDSocketEngine.cpp
     )
 
 SET (HEADERS
         ${INCLUDE_DIR}/Socket.h
         ${INCLUDE_DIR}/SocketImpl.h
         ${INCLUDE_DIR}/SocketEngine.h
-        ${INCLUDE_DIR}/BSDSocketImpl.h
-        ${INCLUDE_DIR}/BSDSocketEngine.h
     )
 
 ADD_EXECUTABLE (tests ${SOURCES})

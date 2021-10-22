@@ -13,6 +13,7 @@ public:
     virtual ~Socket() = default;
 
     void bind(uint16_t port);
+    bool connect(const std::string& hostname, uint16_t port);
     Socket accept();
 protected:
     virtual void setImpl(SocketImplHolder impl);
