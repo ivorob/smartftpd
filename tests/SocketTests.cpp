@@ -1,4 +1,5 @@
 #include <thread>
+#include <mutex>
 #include <gtest/gtest.h>
 
 #if defined(__linux__) || defined(__APPLE_CC__)
