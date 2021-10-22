@@ -11,31 +11,67 @@
 #endif
 
 #include "smartftpd/Socket.h"
-#include "smartftpd/BSDSocketEngine.h"
 
 namespace {
 
-void connectToPort(uint16_t port) {
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd > 0) {
-        struct sockaddr_in addr;
-#if defined(__APPLE_CC__) 
-        addr.sin_len = sizeof(addr);
-#endif 
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(port);
+class MockSocketImpl : public SocketImpl {
+public:
+    bool bind(const struct sockaddr_in& addr) override {
+        std::lock_guard<std::mutex> lock(mockImplMutex);
 
-        struct hostent *host = gethostbyname("localhost");
-        memcpy(&addr.sin_addr.s_addr, host->h_addr_list[0], sizeof(addr.sin_addr.s_addr));
-        if (connect(sockfd, (const struct sockaddr *)&addr, sizeof(addr)) < 0) {
-            FAIL() << "Connection failed to port " << port;
+        this->ports.insert(htons(addr.sin_port));
+        return true;
+    }
+
+    bool reuse() override {
+        return true;
+    }
+
+    bool connect(const std::string& hostname, uint16_t port) override {
+        std::lock_guard<std::mutex> lock(mockImplMutex);
+
+        if (this->ports.count(port) == 0) {
+            return false;
         }
 
-#if defined(__linux__) || defined(__APPLE_CC__)
-        ::close(sockfd);
-#elif defined(_WIN32) || defined(_WIN64)
-        closesocket(sockfd);
-#endif 
+        this->ports.insert(port);
+        return true;
+    }
+
+    int listen(int backlog) override {
+        return 0;
+    }
+
+    void close() override {
+    }
+
+    SocketImplHolder accept() override {
+        return std::make_unique<MockSocketImpl>();
+    }
+private:
+    static std::set<uint16_t> ports;
+    static std::mutex mockImplMutex;
+};
+
+std::set<uint16_t> MockSocketImpl::ports;
+std::mutex MockSocketImpl::mockImplMutex;
+
+class MockSocketEngine : public SocketEngine {
+public:
+    SocketImplHolder makeImpl() override {
+        return std::make_unique<MockSocketImpl>();
+    }
+
+    SocketImplHolder makeImpl(int sockfd) override {
+        return {};
+    }
+};
+
+void connectToPort(uint16_t port) {
+    MockSocketEngine socketEngine;
+    Socket socket(socketEngine);
+    if (!socket.connect("localhost", port)) {
+        FAIL() << "Connection failed to port " << port;
     }
 }
 
@@ -43,7 +79,7 @@ void connectToPort(uint16_t port) {
 
 TEST(SocketTests, Bind)
 {
-    BSDSocketEngine socketEngine;
+    MockSocketEngine socketEngine;
     Socket tcpSocket(socketEngine);
 #if defined(__linux__)
     try {
@@ -63,11 +99,22 @@ TEST(SocketTests, Bind)
 
 TEST(SocketTests, Accept)
 {
-    BSDSocketEngine socketEngine;
+    MockSocketEngine socketEngine;
     Socket tcpSocket(socketEngine);
     tcpSocket.bind(10021);
 
     std::thread thread(connectToPort, 10021);
     Socket newSocket = tcpSocket.accept();
-    thread.join();
+    if (thread.joinable()) {
+        thread.join();
+    }
+}
+
+TEST(SocketTests, connecting_to_invalid_port_is_failed)
+{
+    MockSocketEngine socketEngine;
+
+    Socket socket(socketEngine);
+
+    ASSERT_FALSE(socket.connect("localhost", 10022));
 }

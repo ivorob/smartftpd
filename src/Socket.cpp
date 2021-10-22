@@ -36,6 +36,12 @@ Socket::bind(uint16_t port)
     }
 }
 
+bool
+Socket::connect(const std::string& hostname, uint16_t port)
+{
+    return getImpl().connect(hostname, port);
+}
+
 SocketImpl&
 Socket::getImpl() const
 {
@@ -52,6 +58,5 @@ Socket
 Socket::accept()
 {
     getImpl().listen(SOMAXCONN);
-    Socket newSocket(getImpl().accept());
-    return std::move(newSocket);
+    return Socket(getImpl().accept());
 }
